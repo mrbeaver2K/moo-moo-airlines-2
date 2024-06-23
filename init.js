@@ -1,6 +1,9 @@
 var canvasWidth = window.screen.width - 1;
 var canvasHeight = window.screen.height - 170;
-var cowNum = Math.ceil((window.screen.width * window.screen.height) / (131336 + (1 / 3)))
+var gameWidth = 8000;
+var gameHeight = 8000;
+var cowNum = 128;// = Math.ceil((window.screen.width * window.screen.height) / (131336 + (1 / 3)))
+var airlineComplexity = 5;
 var sprWidth = 64;
 var sprHeight = 64;
 var player;
@@ -10,10 +13,11 @@ var coins = 100;
 var build;
 var builds = ["Sky Cow Extractor"];
 var selectedBuild = 0;
+var machines;
 var skyCowExtractors;
 var milk = 0;
 var milkSellers;
-var fr = 30;
+var fr = 60;
 var creamDairies;
 var butterDairies;
 var cream = 0;
@@ -34,8 +38,8 @@ var buildButton;
 var warpStations;
 var warpButton;
 var cheatCodeBozoAvalible = true;
-var switchButton;
-var currentToolbar = 0;
+//var switchButton;
+//var currentToolbar = 0;
 var saltCows;
 var waterDrills;
 var desertZoneProbability = 1000; // Set to 0 to disable. 1000 is the recomended size.
@@ -60,6 +64,7 @@ var exportRequest;
 var skyFences;
 var keyDown = false;
 var keyChecked = false;
+var playerGroup;
 
 function preload() {
   playerImg = loadImage("images/Player.png");
@@ -114,6 +119,7 @@ function setup() {
   player.addImage(playerImg);
   player.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
   cows = new Group();
+  machines = new Group();
   skyCowExtractors = new Group();
   milkSellers = new Group();
   creamDairies = new Group();
@@ -134,6 +140,8 @@ function setup() {
   steamBursts = new Group();
   truckBays = new Group();
   skyFences = new Group();
+  playerGroup = new Group();
+  playerGroup.add(player);
   frameRate(fr);
   if (getItem("highScore") == null) {
     storeItem("highScore", 100);
@@ -201,7 +209,7 @@ function setup() {
   dealButton.onPress = function() {
     contracts();
   }
-  switchButton = new Clickable();
+  /*switchButton = new Clickable();
   switchButton.locate(0, 0);
   switchButton.text = "⏩ Next Toolbar";
   switchButton.stroke = "#008000";
@@ -218,7 +226,7 @@ function setup() {
     } else {
       currentToolbar = 0;
     }
-  }
+  }*/
   pauseButton = new Clickable();
   pauseButton.locate(canvasWidth - 100, canvasHeight - 50);
   pauseButton.text = "Menu";

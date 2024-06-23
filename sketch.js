@@ -1,24 +1,36 @@
 function playerControls() {
   if (keyIsDown(RIGHT_ARROW) || keyIsDown(68) || moveRight) {
     player.position.x += speed
-    if (player.position.x + sprWidth / 2 > canvasWidth) {
-      player.position.x = canvasWidth - sprWidth / 2;
+    if (player.position.x + sprWidth / 2 > camera.position.x + canvasWidth * 0.375 && camera.position.x < gameWidth - canvasWidth / 2) {
+      camera.position.x += speed;
+    }
+    if (player.position.x + sprWidth / 2 > gameWidth) {
+      player.position.x = gameWidth - sprWidth / 2;
     }
   } else if (keyIsDown(LEFT_ARROW) || keyIsDown(65) || moveLeft) {
     player.position.x -= speed
-    if (player.position.x < 0 + sprWidth / 2) {
-      player.position.x = 0 + sprWidth / 2;
+    if (player.position.x < camera.position.x - canvasWidth * 0.375 + sprWidth / 2 && camera.position.x > canvasWidth / 2) {
+      camera.position.x -= speed;
+    }
+    if (player.position.x < sprWidth / 2) {
+      player.position.x = sprWidth / 2;
     }
   }
   if (keyIsDown(UP_ARROW) || keyIsDown(87) || moveUp) {
     player.position.y -= speed
-    if (player.position.y < 0 + sprHeight / 2) {
-      player.position.y = 0 + sprHeight / 2;
+    if (player.position.y < camera.position.y - canvasHeight * 0.375 + sprHeight / 2 && camera.position.y > canvasHeight / 2) {
+      camera.position.y -= speed;
+    }
+    if (player.position.y < sprHeight / 2) {
+      player.position.y = sprHeight / 2;
     }
   } else if (keyIsDown(DOWN_ARROW) || keyIsDown(83) || moveDown) {
     player.position.y += speed
-    if (player.position.y + sprHeight / 2 > canvasHeight) {
-      player.position.y = canvasHeight - sprHeight / 2;
+    if (player.position.y + sprHeight / 2 > camera.position.y + canvasHeight * 0.375 && camera.position.y < gameHeight - canvasHeight / 2) {
+      camera.position.y += speed;
+    }
+    if (player.position.y + sprHeight / 2 > gameHeight) {
+      player.position.y = gameHeight - sprHeight / 2;
     }
   }
   if (keyIsDown(81) || keyIsDown(97)) {
@@ -79,11 +91,11 @@ function createCows(numberOfCows, typeOfCows, cowX, cowY) {
     typeOfCows = "cow";
   }
   if (cowX == null) {
-    cowX = random(canvasWidth);
+    cowX = random(gameWidth);
     doCowX = true;
   }
   if (cowY == null) {
-    cowY = random(canvasHeight);
+    cowY = random(gameHeight);
     doCowY = true;
   }
   if (typeOfCows == "cow") {
@@ -95,19 +107,19 @@ function createCows(numberOfCows, typeOfCows, cowX, cowY) {
       cow.refill = 150;
       cow.xpositions = [cowX];
       cow.ypositions = [cowY];
-      cow.target = 1;
-      for (var i = 0; i < 5; i++) {
-        cow.xpositions.push(Math.floor(random(canvasWidth)))
-        cow.ypositions.push(Math.floor(random(canvasHeight)))
+      cow.target = 0;
+      for (var j = 0; j < airlineComplexity; j++) {
+        cow.xpositions.push(Math.abs(cow.xpositions[j] + Math.floor(random(gameWidth / 10) - gameWidth / 20)) % gameWidth);
+        cow.ypositions.push(Math.abs(cow.ypositions[j] + Math.floor(random(gameHeight / 10) - gameHeight / 20)) % gameHeight);
       }
       cow.isClassic = true;
       cow.isAttracted = false;
       cows.add(cow);
       if (doCowX) {
-        cowX = random(canvasWidth);
+        cowX = random(gameWidth);
       }
       if (doCowY) {
-        cowY = random(canvasHeight);
+        cowY = random(gameHeight);
       }
     }
   }
@@ -154,6 +166,7 @@ function building(build) {
         skyCowExtractor.addAnimation("extract", extractorAnim);
         skyCowExtractor.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         skyCowExtractor.cost = 50
+        machines.add(skyCowExtractor);
         skyCowExtractors.add(skyCowExtractor);
       }
     }
@@ -165,6 +178,7 @@ function building(build) {
         milkSeller.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         milkSeller.reload = 128
         milkSeller.cost = 50
+        machines.add(milkSeller);
         milkSellers.add(milkSeller);
       }
     }
@@ -176,6 +190,7 @@ function building(build) {
         creamDairy.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         creamDairy.reload = 240
         creamDairy.cost = 250
+        machines.add(creamDairy);
         creamDairies.add(creamDairy);
       }
     }
@@ -187,6 +202,7 @@ function building(build) {
         creamSeller.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         creamSeller.reload = 128
         creamSeller.cost = 150
+        machines.add(creamSeller);
         creamSellers.add(creamSeller);
       }
     }
@@ -198,6 +214,7 @@ function building(build) {
         butterDairy.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         butterDairy.reload = 480
         butterDairy.cost = 500
+        machines.add(butterDairy);
         butterDairies.add(butterDairy);
       }
     }
@@ -207,6 +224,7 @@ function building(build) {
         var skyCowPrinter = createSprite(player.position.x, player.position.y, sprWidth, sprHeight);
         skyCowPrinter.addAnimation("print", printerAnim);
         skyCowPrinter.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
+        machines.add(skyCowPrinter);
         skyCowPrinters.add(skyCowPrinter);
       }
     }
@@ -236,6 +254,7 @@ function building(build) {
         fence.addImage(fenceImg);
         fence.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         fence.cost = 10
+        machines.add(fence);
         fences.add(fence);
       }
     }
@@ -250,6 +269,7 @@ function building(build) {
         well.uses = 4;
         well.active = true;
         well.repairTick = 0;
+        machines.add(well);
         wells.add(well);
       }
     }
@@ -264,6 +284,7 @@ function building(build) {
         field.growTime = 0;
         field.crop = 0;
         field.nutrients = 100;
+        machines.add(field);
         fields.add(field);
       }
     }
@@ -274,6 +295,7 @@ function building(build) {
         rotaryMilker.addAnimation("milk", rotaryMilkerAnim);
         rotaryMilker.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         rotaryMilker.cost = 450
+        machines.add(rotaryMilker);
         rotaryMilkers.add(rotaryMilker);
       }
     }
@@ -286,6 +308,7 @@ function building(build) {
         warpStation.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         warpStation.name = prompt("What would you like to call this Teleport Station?");
         warpStation.cost = 500
+        machines.add(warpStation);
         warpStations.add(warpStation);
       }
     }
@@ -302,6 +325,7 @@ function building(build) {
         waterDrill.interfaceTick = 0;
         waterDrill.recipe = 0;
         waterDrill.craftTime = 0;
+        machines.add(waterDrill);
         waterDrills.add(waterDrill);
       }
     }
@@ -314,6 +338,7 @@ function building(build) {
         desalinator.reload = 480;
         desalinator.temp = 0
         desalinator.cost = 450;
+        machines.add(desalinator);
         desalinators.add(desalinator);
       }
     }
@@ -336,6 +361,7 @@ function building(build) {
         skyFence.addAnimation("keep", skyFenceAnim);
         skyFence.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
         skyFence.cost = 10
+        machines.add(skyFence);
         skyFences.add(skyFence);
       }
       else if(yesno == true) {
@@ -347,10 +373,14 @@ function building(build) {
 
 function cowMovement() {
   for (var i = 0; i < cows.size(); i++) {
-    cows.get(i).setSpeed(0, 0);
-    cows.get(i).attractionPoint(3, cows.get(i).xpositions[cows.get(i).target], cows.get(i).ypositions[cows.get(i).target]);
-    if (cows.get(i).position.x == cows.get(i).xpositions[cows.get(i).target] && cows.get(i).position.y == cows.get(i).ypositions[cows.get(i).target]) {
+    if (cows.get(i).position.x - 12 <= cows.get(i).xpositions[cows.get(i).target] && cows.get(i).position.x + 12 >= cows.get(i).xpositions[cows.get(i).target] && cows.get(i).position.y - 12 <= cows.get(i).ypositions[cows.get(i).target] && cows.get(i).position.y + 12 >= cows.get(i).ypositions[cows.get(i).target]) {
       cows.get(i).target++;
+      if (cows.get(i).target > 5) {
+        cows.get(i).target = 0;
+      }
+      cows.get(i).setSpeed(0, 0);
+      cows.get(i).attractionPoint(3, cows.get(i).xpositions[cows.get(i).target], cows.get(i).ypositions[cows.get(i).target]);
+      console.debug(cows.get(i).target);
     }
     cows.get(i).refill--
     if (cows.get(i).refill == 0) {
@@ -402,7 +432,7 @@ function doDeserts() {
     desertActive = false;
   }
   if (desertActive == true) {
-    var desertZone = createSprite(random(canvasWidth), random(canvasHeight), sprWidth * 2, sprHeight * 2);
+    var desertZone = createSprite(random(gameWidth), random(gameHeight), sprWidth * 2, sprHeight * 2);
     desertZone.addImage(desertZoneImg);
     desertZone.setCollider("rectangle", 0, 0, sprWidth, sprHeight);
     desertZone.timeLeft = 3000;
@@ -425,8 +455,8 @@ function collisions() {
   creamSellers.overlap(player, destroy);
   butterDairies.overlap(player, destroy);
   desalinators.overlap(player, destroy);
-  skyCowPrinters.collide(player, make);
-  skyCowPrinters.collide(player, destroy);
+  skyCowPrinters.overlap(player, make);
+  skyCowPrinters.overlap(player, destroy);
   caughtCows.collide(fences, reloadCowAngle);
   skyCowCatchers.overlap(cows, capture);
   caughtCows.collide(player, extract);
@@ -449,6 +479,7 @@ function collisions() {
   cows.collide(skyFences, reloadCowAngle);
   player.overlap(skyFences, destroy);
   steamBursts.overlap()
+  cows.overlap(player, observeSkyCow);
   if (keyIsDown(82)) {
     skyCowExtractors.collide(player);
     milkSellers.collide(player);
@@ -540,6 +571,14 @@ function warping() {
       }
     }
   }
+}
+
+function observeSkyCow(observedCow) {
+  stroke("blue")
+  for (var i = 0; i < 5; i++) {
+    line(observedCow.xpositions[i], observedCow.ypositions[i], observedCow.xpositions[i + 1], observedCow.ypositions[i + 1]);
+  }
+  line(observedCow.xpositions[0], observedCow.ypositions[0], observedCow.xpositions[5], observedCow.ypositions[5])
 }
 
 function milkCow(cowToMilk) {
@@ -841,20 +880,27 @@ function extract(cowInQuestion) {
 }
 
 function draw() {
-  background("green");
+  background("blue");
+  stroke("blue");
+  fill("green");
+  rect(0, 0, gameWidth, gameHeight);
+  stroke("black");
+  fill("black");
   playerControls();
   cowMovement();
   doDeserts();
   doResearch();
+  camera.off();
   textSize(32);
-  text("💲 Coins: " + coins, 110, 30);
-    text("💧 Water: " + water, 10, 100);
-    text("🥛 Milk: " + milk, 10, 170);
-    text("🧂🥛 Salty Milk: " + saltyMilk, 10, 240);
-    text("🍨 Cream: " + cream, 10, 310);
-    text("🧈 Butter: " + butter, 10, 380);
-    text("🧂 Salt: " + salt, 10, 450);
-    text("🌾 Wheat: " + wheat, 10, 520);
+  textAlign(LEFT);
+  text("💲 Coins: " + coins, 10, 30);
+  text("💧 Water: " + water, 10, 100);
+  text("🥛 Milk: " + milk, 10, 170);
+  text("🧂🥛 Salty Milk: " + saltyMilk, 10, 240);
+  text("🍨 Cream: " + cream, 10, 310);
+  text("🧈 Butter: " + butter, 10, 380);
+  text("🧂 Salt: " + salt, 10, 450);
+  text("🌾 Wheat: " + wheat, 10, 520);
   if (destroyMode && !gamepad) {
     text("Destroy Mode On. Press Q or 1 to turn off.", 10, canvasHeight - 40);
   }
@@ -864,7 +910,7 @@ function draw() {
   else {
     destroyButton.color = "#008000";
   }
-  switchButton.draw();
+  //switchButton.draw();
   pauseButton.draw();
   buildButton.text = builds[selectedBuild];
   buildButton.draw();
@@ -888,8 +934,21 @@ function draw() {
     gamepadLeftButton.draw();
     destroyButton.draw();
   }
-  drawSprites();
+  camera.on();
+  desertZones.draw();
+  skyCowCatchers.draw();
+  truckBays.draw();
+  machines.draw();
+  caughtCows.draw();
+  saltCows.draw();
+  playerGroup.draw();
+  cows.draw();
   collisions();
+  if (keyIsDown(73)) {
+    for (var i = 0; i < cows.length;i++) {
+      observeSkyCow(cows.get(i));
+    }
+  }
   selling();
   if (coins > getItem("highScore")) {
     removeItem("highScore");
